@@ -10,7 +10,8 @@ from string_generator import (
     create_strings_from_wikipedia,
     create_strings_randomly
 )
-from data_generator import FakeTextDataGenerator
+
+from TextRecognitionDataGenerator.data_generator import FakeTextDataGenerator
 from multiprocessing import Pool
 
 def margins(margin):

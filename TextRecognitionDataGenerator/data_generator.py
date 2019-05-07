@@ -1,15 +1,19 @@
 import os
 import random
+import logging
+logger = logging.getLogger(__name__)
 
 from PIL import Image, ImageFilter
 
-import computer_text_generator
-import background_generator
-import distorsion_generator
+from . import computer_text_generator
+from . import background_generator
+from . import distorsion_generator
+
 try:
-    import handwritten_text_generator
+    from . import handwritten_text_generator
 except ImportError as e:
-    print('Missing modules for handwritten text generation.')
+    handwritten_text_generator=None
+    logging.warning('Missing modules for handwritten text generation.')
 
 
 class FakeTextDataGenerator(object):
@@ -22,8 +26,30 @@ class FakeTextDataGenerator(object):
         cls.generate(*t)
 
     @classmethod
-    def generate(cls, index, text, font, out_dir, size, extension, skewing_angle, random_skew, blur, random_blur, background_type, distorsion_type, distorsion_orientation, is_handwritten, name_format, width, alignment, text_color, orientation, space_width, margins, fit):
-        image = None
+    def generate(cls,
+                 text,
+                 index=None,
+                 font='fonts/latin/Lato-Black.ttf',
+                 out_dir=None,
+                 extension=None,
+                 name_format=None,
+                 size=32,
+                 skewing_angle=0,
+                 random_skew=False,
+                 blur=0,
+                 random_blur=False,
+                 background_type=0,
+                 distorsion_type=0,
+                 distorsion_orientation=0,
+                 is_handwritten=False,
+                 width=-1,
+                 alignment=1,
+                 text_color='#282828',
+                 orientation=0,
+                 space_width=1.0,
+                 margins=(5,)*4,
+                 fit=False,
+            ):
 
         margin_top, margin_left, margin_bottom, margin_right = margins
         horizontal_margin = margin_left + margin_right
@@ -34,7 +60,7 @@ class FakeTextDataGenerator(object):
         ##########################
         if is_handwritten:
             if orientation == 1:
-                raise ValueError("Vertical handwritten text is unavailable")
+                raise NotImplementedError("Vertical handwritten text is unavailable")
             image = handwritten_text_generator.generate(text, text_color, fit)
         else:
             image = computer_text_generator.generate(text, font, text_color, size, orientation, space_width, fit)
@@ -124,15 +150,21 @@ class FakeTextDataGenerator(object):
         #####################################
         # Generate name for resulting image #
         #####################################
-        if name_format == 0:
-            image_name = '{}_{}.{}'.format(text, str(index), extension)
-        elif name_format == 1:
-            image_name = '{}_{}.{}'.format(str(index), text, extension)
-        elif name_format == 2:
-            image_name = '{}.{}'.format(str(index),extension)
-        else:
-            print('{} is not a valid name format. Using default.'.format(name_format))
-            image_name = '{}_{}.{}'.format(text, str(index), extension)
+        if out_dir is not None:
+            if name_format == 0:
+                image_name = '{}_{}.{}'.format(text, str(index), extension)
+            elif name_format == 1:
+                image_name = '{}_{}.{}'.format(str(index), text, extension)
+            elif name_format == 2:
+                image_name = '{}.{}'.format(str(index),extension)
+            else:
+                logging.warning('{} is not a valid name format. Using default.'.format(name_format))
+                image_name = '{}_{}.{}'.format(text, str(index), extension)
 
-        # Save the image
-        final_image.convert('RGB').save(os.path.join(out_dir, image_name))
+            # Save the image
+            final_image.convert('RGB').save(os.path.join(out_dir, image_name))
+
+            return None
+        else:
+            # Return the Image object
+            return final_image.convert('RGB')

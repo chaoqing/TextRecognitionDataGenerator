@@ -5,7 +5,10 @@ import subprocess
 import hashlib
 import string
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), './TextRecognitionDataGenerator')))
+__CWD__ = os.path.abspath(os.path.dirname(__file__))
+__PYTHON_PATH__ = os.path.join(__CWD__, 'TextRecognitionDataGenerator')
+
+sys.path.insert(0, __PYTHON_PATH__)
 
 try:
     os.mkdir('tests/out')
@@ -49,7 +52,7 @@ class DataGenerator(unittest.TestCase):
         )
 
     def test_create_string_from_file(self):
-        strings = create_strings_from_file('tests/test.txt', 6)
+        strings = create_strings_from_file(os.path.join(__CWD__, 'tests/test.txt'), 6)
 
         self.assertTrue(
             len(strings) == 6 and
@@ -597,70 +600,75 @@ class DataGenerator(unittest.TestCase):
         )
 
 class CommandLineInterface(unittest.TestCase):
+    def setUp(self) -> None:
+        self.my_env = os.environ.copy()
+        self.my_env["PYTHONPATH"] = os.path.dirname(__PYTHON_PATH__) + ':' + self.my_env.get("PYTHONPATH", '')
+
+
     def test_output_dir(self):
         args = ['python3', 'run.py', '-c', '1', '--output_dir', '../tests/out_2/']
-        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/").wait()
+        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/", env=self.my_env).wait()
         self.assertTrue(len(os.listdir('tests/out_2/')) == 1)
         empty_directory('tests/out_2/')
 
     def test_language_english(self):
         args = ['python3', 'run.py', '-l', 'en', '-c', '1', '--output_dir', '../tests/out/']
-        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/").wait()
+        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/", env=self.my_env).wait()
         self.assertTrue(len(os.listdir('tests/out/')) == 1)
         empty_directory('tests/out/')
 
     def test_language_french(self):
         args = ['python3', 'run.py', '-l', 'fr', '-c', '1', '--output_dir', '../tests/out/']
-        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/").wait()
+        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/", env=self.my_env).wait()
         self.assertTrue(len(os.listdir('tests/out/')) == 1)
         empty_directory('tests/out/')
 
     def test_language_spanish(self):
         args = ['python3', 'run.py', '-l', 'es', '-c', '1', '--output_dir', '../tests/out/']
-        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/").wait()
+        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/", env=self.my_env).wait()
         self.assertTrue(len(os.listdir('tests/out/')) == 1)
         empty_directory('tests/out/')
 
     def test_language_german(self):
         args = ['python3', 'run.py', '-l', 'de', '-c', '1', '--output_dir', '../tests/out/']
-        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/").wait()
+        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/", env=self.my_env).wait()
         self.assertTrue(len(os.listdir('tests/out/')) == 1)
         empty_directory('tests/out/')
 
     def test_language_chinese(self):
         args = ['python3', 'run.py', '-l', 'cn', '-c', '1', '--output_dir', '../tests/out/']
-        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/").wait()
+        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/", env=self.my_env).wait()
         self.assertTrue(len(os.listdir('tests/out/')) == 1)
         empty_directory('tests/out/')
 
     def test_count_parameter(self):
         args = ['python3', 'run.py', '-c', '10', '--output_dir', '../tests/out/']
-        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/").wait()
+        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/", env=self.my_env).wait()
         self.assertTrue(len(os.listdir('tests/out/')) == 10)
         empty_directory('tests/out/')
 
     def test_random_sequences_letter_only(self):
         args = ['python3', 'run.py', '-rs', '-let', '-c', '1', '--output_dir', '../tests/out/']
-        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/").wait()
+        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/", env=self.my_env).wait()
         self.assertTrue(all([c in string.ascii_letters for f in os.listdir('tests/out/') for c in f.split('_')[0]]))
         empty_directory('tests/out/')
 
     def test_random_sequences_number_only(self):
         args = ['python3', 'run.py', '-rs', '-num', '-c', '1', '--output_dir', '../tests/out/']
-        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/").wait()
+        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/", env=self.my_env).wait()
         self.assertTrue(all([c in '0123456789' for f in os.listdir('tests/out/') for c in f.split('_')[0]]))
         empty_directory('tests/out/')
 
     def test_random_sequences_symbols_only(self):
         args = ['python3', 'run.py', '-rs', '-sym', '-c', '1', '--output_dir', '../tests/out/']
-        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/").wait()
+        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/", env=self.my_env).wait()
         with open('tests/out/labels.txt', 'r') as f:
             self.assertTrue(all([c in "!\"#$%&'()*+,-./:;?@[\\]^_`{|}~" for c in f.readline().split(' ')[1][:-1]]))
         empty_directory('tests/out/')
 
     def test_handwritten(self):
         args = ['python3', 'run.py', '-c', '1', '--output_dir', '../tests/out/']
-        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/").wait()
+        subprocess.Popen(args, cwd="TextRecognitionDataGenerator/", env=self.my_env).wait()
         self.assertTrue(len(os.listdir('tests/out/')) == 1)
         empty_directory('tests/out/')
 

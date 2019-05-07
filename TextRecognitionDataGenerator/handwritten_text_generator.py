@@ -6,7 +6,6 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.mlab as mlab
-import seaborn
 from PIL import Image, ImageColor
 from collections import namedtuple
 
